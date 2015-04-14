@@ -15,6 +15,8 @@ public:
     void stop();
     void destroy();
 
+    void waitForFinished();
+
 private:
     ServerPrivate *d {nullptr};
 };

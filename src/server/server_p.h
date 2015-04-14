@@ -3,17 +3,25 @@
 
 #include "server.h"
 
+#include <atomic>
+#include <condition_variable>
 #include <thread>
 #include <vector>
 
 class ServerPrivate
 {
 public:
+    void run();
+    void runOnce() {}
+    void stop();
+
     int threadsCount {4};
     std::vector<std::thread> _threads;
+    std::atomic_int _runningThreads {0};
+    std::atomic_bool stopped {false};
 
-    void run() {}
-    void stop() {}
+    std::mutex mutex;
+    std::condition_variable waitCondition;
 
     friend class Server;
 };

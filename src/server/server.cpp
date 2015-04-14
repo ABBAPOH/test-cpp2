@@ -3,6 +3,25 @@
 
 #include <iostream>
 
+void ServerPrivate::run()
+{
+    _runningThreads++;
+
+    while (!stopped) {
+        runOnce();
+    }
+
+    if (_runningThreads--) {
+        std::unique_lock<std::mutex> l(mutex);
+        waitCondition.notify_one();
+    }
+}
+
+void ServerPrivate::stop()
+{
+    stopped = true;
+}
+
 Server::Server() :
     d(new ServerPrivate)
 {
@@ -25,6 +44,7 @@ Result<void> Server::init(int threadsCount)
 
 Result<void> Server::start()
 {
+    d->stopped = false;
     for (int i = 0; i < d->threadsCount; ++i) {
         d->_threads.push_back(std::thread([this]() {
             d->run();
@@ -42,4 +62,10 @@ void Server::stop()
         thread.join();
 
     d->_threads.clear();
+}
+
+void Server::waitForFinished()
+{
+    std::unique_lock<std::mutex> l(d->mutex);
+    d->waitCondition.wait(l);
 }
