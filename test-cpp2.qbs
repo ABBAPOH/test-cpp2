@@ -20,7 +20,7 @@ Project {
             return "lib" + lib_suffix + "/" + app_target
     }
 
-    property stringList includePaths: [ path + "/include" ]
+    property stringList includePaths: [ path + "/src/core" ]
 
     property stringList cxxFlags: {
         if (qbs.targetOS.contains("osx"))
