@@ -14,6 +14,12 @@ Product {
 
     cpp.dynamicLibraries: [ "pthread" ]
 
+    Properties {
+        condition: qbs.targetOS.contains("osx")
+        cpp.installNamePrefix: project.installNamePrefix
+        cpp.minimumOsxVersion: "10.7"
+    }
+
     Group {
         fileTagsFilter: product.type
         qbs.install: true
