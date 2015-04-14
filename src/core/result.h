@@ -73,13 +73,13 @@ public:
 
     inline T &value()
     {
-        Q_ASSERT_X(isValid(), "Result::value", "Result is invalid");
+        assert(isValid());
         return m_value;
     }
 
     inline const T &value() const
     {
-        Q_ASSERT_X(isValid(), "Result::value", "Result is invalid");
+        assert(isValid());
         return m_value;
     }
 
@@ -110,25 +110,25 @@ public:
 
     inline T &operator*()
     {
-        Q_ASSERT_X(isValid(), "Result::operator*", "Result is invalid");
+        assert(isValid());
         return m_value;
     }
 
     inline const T &operator*() const
     {
-        Q_ASSERT_X(isValid(), "Result::operator*", "Result is invalid");
+        assert(isValid());
         return m_value;
     }
 
     inline T *operator->()
     {
-        Q_ASSERT_X(isValid(), "Result::operator->", "Result is invalid");
+        assert(isValid());
         return &m_value;
     }
 
     inline const T *operator->() const
     {
-        Q_ASSERT_X(isValid(), "Result::operator->", "Result is invalid");
+        assert(isValid());
         return &m_value;
     }
 
