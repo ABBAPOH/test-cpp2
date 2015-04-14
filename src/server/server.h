@@ -10,7 +10,7 @@ public:
     Server();
     ~Server();
 
-    Result<void> init(int threadsCount = 4);
+    Result<void> init(int port, int threadsCount = 4);
     Result<void> start();
     void stop();
     void destroy();

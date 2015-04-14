@@ -3,6 +3,8 @@
 
 #include "server.h"
 
+#include <tcpsocket.h>
+
 #include <atomic>
 #include <condition_variable>
 #include <thread>
@@ -16,6 +18,9 @@ public:
     void stop();
 
     int threadsCount {4};
+    int port {5000};
+    TcpSocket socket;
+
     std::vector<std::thread> _threads;
     std::atomic_int _runningThreads {0};
     std::atomic_bool stopped {false};

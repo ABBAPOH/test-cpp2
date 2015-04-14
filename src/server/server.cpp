@@ -32,12 +32,13 @@ Server::~Server()
     delete d;
 }
 
-Result<void> Server::init(int threadsCount)
+Result<void> Server::init(int port, int threadsCount)
 {
     if (threadsCount <= 0)
         return Error(std::string("Invalid threads count") + std::to_string(threadsCount));
 
     d->threadsCount = threadsCount;
+    d->port = port;
 
     return Nothing();
 }
@@ -45,6 +46,14 @@ Result<void> Server::init(int threadsCount)
 Result<void> Server::start()
 {
     d->stopped = false;
+
+    auto ok = d->socket.bind("127.0.0.1", d->port);
+    if (!ok)
+        return Error(ok.errorString());
+    ok = d->socket.listen(10);
+    if (!ok)
+        return Error(ok.errorString());
+
     for (int i = 0; i < d->threadsCount; ++i) {
         d->_threads.push_back(std::thread([this]() {
             d->run();

@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     Server server;
     _server = &server;
     std::cout << "Initializing server" << std::endl;
-    auto ok = server.init();
+    auto ok = server.init(5001);
     if (!ok) {
         std::cerr << "Can't init server:" << ok.errorString() << std::endl;
         return 1;
