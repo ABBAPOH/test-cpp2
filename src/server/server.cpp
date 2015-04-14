@@ -5,8 +5,6 @@
 
 void ServerPrivate::run()
 {
-    _runningThreads++;
-
     while (!stopped) {
         runOnce();
     }
@@ -53,6 +51,8 @@ Result<void> Server::start()
     ok = d->socket.listen(10);
     if (!ok)
         return Error(ok.errorString());
+
+    d->start();
 
     for (int i = 0; i < d->threadsCount; ++i) {
         d->_threads.push_back(std::thread([this]() {

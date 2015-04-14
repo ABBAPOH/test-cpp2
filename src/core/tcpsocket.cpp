@@ -161,8 +161,8 @@ Result<void> TcpSocket::createSocket()
             return Error(std::string("setsockopt failed: ") + strerror(errno));
     }
 
-    if (setNonBlock(fd))
-        return Error(std::string("setNonBlock failed: ") + strerror(errno));
+//    if (setNonBlock(fd))
+//        return Error(std::string("setNonBlock failed: ") + strerror(errno));
 
 //    if (setNoDelay(fd))
 //        return Error(std::string("setNoDelay failed: ") + strerror(errno));

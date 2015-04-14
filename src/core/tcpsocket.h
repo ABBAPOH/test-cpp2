@@ -10,6 +10,8 @@ public:
     TcpSocket();
     ~TcpSocket();
 
+    inline int fd() const { return _fd; }
+
     Result<void> connect(const std::string &host, int port);
     Result<void> bind(const std::string &host, int port);
     Result<void> listen(int backlog);

@@ -14,12 +14,15 @@ class ServerPrivate
 {
 public:
     void run();
-    void runOnce() {}
+    void start();
+    void runOnce();
     void stop();
 
     int threadsCount {4};
     int port {5000};
     TcpSocket socket;
+
+    int _kq {0};
 
     std::vector<std::thread> _threads;
     std::atomic_int _runningThreads {0};
