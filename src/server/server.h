@@ -1,6 +1,8 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include <result.h>
+
 class ServerPrivate;
 class Server
 {
@@ -8,8 +10,8 @@ public:
     Server();
     ~Server();
 
-    bool init(int threadsCount = 4);
-    bool start();
+    Result<void> init(int threadsCount = 4);
+    Result<void> start();
     void stop();
     void destroy();
 

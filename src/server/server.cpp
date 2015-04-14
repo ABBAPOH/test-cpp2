@@ -13,19 +13,17 @@ Server::~Server()
     delete d;
 }
 
-bool Server::init(int threadsCount)
+Result<void> Server::init(int threadsCount)
 {
-    if (threadsCount <= 0) {
-        std::cerr << "Invalid threads count" << threadsCount << std::endl;
-        return false;
-    }
+    if (threadsCount <= 0)
+        return Error(std::string("Invalid threads count") + std::to_string(threadsCount));
 
     d->threadsCount = threadsCount;
 
-    return true;
+    return Nothing();
 }
 
-bool Server::start()
+Result<void> Server::start()
 {
     for (int i = 0; i < d->threadsCount; ++i) {
         d->_threads.push_back(std::thread([this]() {
@@ -33,7 +31,7 @@ bool Server::start()
         } ));
     }
 
-    return true;
+    return Nothing();
 }
 
 void Server::stop()
