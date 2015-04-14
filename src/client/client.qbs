@@ -8,6 +8,10 @@ Product {
     destinationDirectory: project.install_binary_path
     files: [ "*.cpp", "*.h" ]
 
+    cpp.includePaths: project.includePaths
+    cpp.cxxFlags: project.cxxFlags
+    cpp.linkerFlags: project.linkFlags
+
     Group {
         fileTagsFilter: product.type
         qbs.install: true
