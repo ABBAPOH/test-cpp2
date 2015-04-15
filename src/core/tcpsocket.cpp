@@ -149,6 +149,30 @@ void TcpSocket::close()
     }
 }
 
+Result<int64_t> TcpSocket::read(char *data, int64_t size)
+{
+    if (size == 0)
+        return 0;
+
+    auto bytesRead = ::read(_fd, data, size);
+    if (bytesRead == -1)
+        return Error(std::string("Read failed: ") + strerror(errno));
+
+    return bytesRead;
+}
+
+Result<int64_t> TcpSocket::write(const char *data, int64_t size)
+{
+    if (size == 0)
+        return 0;
+
+    auto bytesWritten = ::write(_fd, data, size);
+    if (bytesWritten == -1)
+        return Error(std::string("Write failed: ") + strerror(errno));
+
+    return bytesWritten;
+}
+
 Result<void> TcpSocket::createSocket()
 {
     int fd = ::socket(AF_INET, SOCK_STREAM, 0);

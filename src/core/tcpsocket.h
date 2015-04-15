@@ -18,6 +18,9 @@ public:
     Result<TcpSocket> accept();
     void close();
 
+    Result<int64_t> read(char *data, int64_t size);
+    Result<int64_t> write(const char *data, int64_t size);
+
 private:
     explicit TcpSocket(int fd) : _fd(fd) {}
     Result<void> createSocket();
