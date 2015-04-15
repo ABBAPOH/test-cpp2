@@ -19,6 +19,11 @@ Product {
         cpp.minimumOsxVersion: "10.7"
     }
 
+    Properties {
+        condition: qbs.targetOS.contains("unix") && !qbs.targetOS.contains("osx")
+        cpp.rpaths: [ "$ORIGIN/../lib/" + project.app_target ]
+    }
+
     Group {
         fileTagsFilter: product.type
         qbs.install: true
