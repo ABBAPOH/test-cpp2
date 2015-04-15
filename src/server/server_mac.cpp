@@ -38,13 +38,11 @@ void ServerPrivate::runOnce()
     assert(ev_ch - ev0 < 8);
     int nfd = kevent(_kq, 0, 0, ev, 1, &waitspec);
     ev_ch = ev0;
-    //memset(ev0, 0, sizeof(ev0));
     if (!nfd)
             return;
     if (nfd == -1) {
         std::cerr << "kevent" << std::endl;
-//            _log->error("kevent");
-            return;
+        return;
     }
     if (!ev->udata && (int)ev->ident == socket.fd()) {
         std::cout << "Accept" << std::endl;
