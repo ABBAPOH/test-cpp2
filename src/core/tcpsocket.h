@@ -19,7 +19,9 @@ public:
     void close();
 
     Result<int64_t> read(char *data, int64_t size);
+    Result<std::string> read(int64_t size);
     Result<int64_t> write(const char *data, int64_t size);
+    Result<int64_t> write(const std::string &data);
 
 private:
     explicit TcpSocket(int fd) : _fd(fd) {}

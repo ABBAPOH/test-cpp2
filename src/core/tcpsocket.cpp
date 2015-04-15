@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 #include <iostream>
+#include <memory>
 
 namespace Internal {
 
@@ -161,6 +162,15 @@ Result<int64_t> TcpSocket::read(char *data, int64_t size)
     return bytesRead;
 }
 
+Result<std::string> TcpSocket::read(int64_t size)
+{
+    std::unique_ptr<char []> buffer(new char[size]);
+    auto result = read(buffer.get(), size);
+    if (!result)
+        return Error(result.errorString());
+    return std::string(buffer.get(), *result);
+}
+
 Result<int64_t> TcpSocket::write(const char *data, int64_t size)
 {
     if (size == 0)
@@ -171,6 +181,11 @@ Result<int64_t> TcpSocket::write(const char *data, int64_t size)
         return Error(std::string("Write failed: ") + strerror(errno));
 
     return bytesWritten;
+}
+
+Result<int64_t> TcpSocket::write(const std::string &data)
+{
+    return write(data.c_str(), data.size());
 }
 
 Result<void> TcpSocket::createSocket()
