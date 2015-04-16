@@ -5,13 +5,18 @@
 
 #include <vector>
 
+struct Message;
+
 class Connection
 {
 public:
     explicit Connection(const TcpSocket &socket);
 
     void read();
+
+private:
     int64_t readData(const char *data, int64_t length);
+    void process(const Message &message);
 
 private:
     TcpSocket _socket;

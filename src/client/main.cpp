@@ -1,6 +1,28 @@
 #include <tcpsocket.h>
 
+#include <message.h>
+
+#include <cstring>
 #include <iostream>
+#include <memory>
+
+Result<void> send(TcpSocket &socket, const Message &message)
+{
+    auto bufferSize = sizeof(Frame) + message.size;
+
+    std::unique_ptr<char []> buffer(new char[bufferSize]);
+    auto frame = reinterpret_cast<Frame *>(buffer.get());
+    frame->size = message.size;
+    frame->id = message.id;
+    frame->seq = message.seq;
+    std::memmove(frame + 1, message.data, message.size);
+
+    auto ok = socket.write(buffer.get(), bufferSize);
+    if (!ok)
+        return Error(ok.errorString());
+
+    return Nothing();
+}
 
 int main(int argc, char *argv[])
 {
@@ -14,10 +36,20 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    int seq = 1;
+
     while (1) {
-        auto written = socket.write("hello");
-        if (!written) {
-            std::cerr << "Can't write: " << written.errorString();
+        const char *string = "hello world";
+
+        Message msg;
+        msg.id = 1;
+        msg.seq = seq++;
+        msg.size = strlen(string);
+        msg.data = const_cast<char *>(string);
+
+        auto sent = ::send(socket, msg);
+        if (!sent) {
+            std::cerr << "Can't send: " << sent.errorString();
             return 1;
         }
     }

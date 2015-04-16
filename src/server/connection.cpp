@@ -1,5 +1,7 @@
 #include "connection.h"
 
+#include "message.h"
+
 #include <cstring>
 #include <iostream>
 
@@ -30,14 +32,34 @@ void Connection::read()
 
 int64_t Connection::readData(const char *data, int64_t length)
 {
-    int l = 5;
+    std::size_t result = 0;
+    const char *end = data + length;
     const char *ptr = data;
-    int64_t result = 0;
-    while (length >= l) {
-        std::cout << "Got mesage of length " << l << " : " << std::string(data, 5) << std::endl;
-        ptr += l;
-        length -= l;
-        result += l;
+    while (ptr + sizeof(Frame) <= end) {
+        auto *frame = reinterpret_cast<const Frame *>(ptr);
+        const size_t fullSize = sizeof(Frame) + frame->size;
+
+        Message msg;
+        msg.id = frame->id;
+        msg.seq = frame->seq;
+        msg.size = frame->size;
+        msg.data = const_cast<char *>(reinterpret_cast<const char *>(ptr + sizeof(Frame)));
+
+        if (ptr + fullSize > end)
+            break;
+        ptr += sizeof(Frame);
+
+        process(msg);
+
+        ptr += frame->size;
+        result += fullSize;
     }
     return result;
+}
+
+void Connection::process(const Message &message)
+{
+    std::cout << "Received message, id = " << message.id
+              << " size = " << message.size
+              << " seq = " << message.seq << std::endl;
 }
