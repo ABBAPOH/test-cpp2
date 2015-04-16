@@ -1,6 +1,7 @@
 #ifndef SERVER_P_H
 #define SERVER_P_H
 
+#include "connection.h"
 #include "server.h"
 
 #include <tcpsocket.h>
@@ -9,6 +10,7 @@
 #include <condition_variable>
 #include <thread>
 #include <vector>
+#include <unordered_map>
 
 class ServerPrivate
 {
@@ -30,6 +32,9 @@ public:
 
     std::mutex mutex;
     std::condition_variable waitCondition;
+
+    std::mutex connectionMutex;
+    std::unordered_map<int, std::unique_ptr<Connection>> connections;
 
     friend class Server;
 };

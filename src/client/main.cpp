@@ -14,7 +14,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    while (1) {}
+    while (1) {
+        auto written = socket.write("hello");
+        if (!written) {
+            std::cerr << "Can't write: " << written.errorString();
+            return 1;
+        }
+    }
 
     return 0;
 }

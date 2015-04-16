@@ -2,6 +2,7 @@
 #include "server_p.h"
 
 #include <iostream>
+#include <memory>
 
 #include <string.h>
 #include <sys/epoll.h>
@@ -34,7 +35,41 @@ void ServerPrivate::runOnce()
         return;
     }
 
+    auto newFd = 0;
     if (ev.data.fd == socket.fd()) {
         std::cout << "Accept" << std::endl;
+
+        auto accapted = socket.accept();
+        if (!accapted) {
+            std::cerr << "Accept failed" << accapted.errorString() << std::endl;
+            return;
+        }
+
+        ev.events = EPOLLIN | EPOLLERR | EPOLLONESHOT;
+        epoll_ctl(_kq, EPOLL_CTL_MOD, ev.data.fd, &ev);
+
+        newFd = accapted->fd();
+
+        struct epoll_event empty;
+        memset(&empty, 0, sizeof(epoll_event));
+        empty.data.fd = newFd;
+        epoll_ctl(_kq, EPOLL_CTL_ADD, newFd, &empty);
+
+        std::lock_guard<std::mutex> l(connectionMutex);
+        connections.emplace(newFd, std::unique_ptr<Connection>(new Connection(*accapted)));
+    } else {
+        std::cout << "Recv from client" << std::endl;
+        newFd = ev.data.fd;
+
+        std::lock_guard<std::mutex> l(connectionMutex);
+        auto connection = connections[newFd].get();
+        connection->read();
     }
+
+    struct epoll_event ev2;
+    memset(&ev2, 0, sizeof(epoll_event));
+    ev2.events = EPOLLIN | EPOLLERR | EPOLLONESHOT;
+    ev2.data.fd = newFd;
+
+    epoll_ctl(_kq, EPOLL_CTL_MOD, newFd, &ev2);
 }
