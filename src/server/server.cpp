@@ -31,23 +31,14 @@ void ServerPrivate::stop()
 void ServerPrivate::multiCast(const Message &message)
 {
     std::cout << "multiCast" << message.seq << std::endl;
-    // TODO: duplicates code in Client::send
-    auto bufferSize = sizeof(Message) + message.size;
-    std::unique_ptr<char []> buffer(new char[bufferSize]);
 
-    auto msg = reinterpret_cast<Message*>(buffer.get());
-    char *d = reinterpret_cast<char *>(msg + 1);
-
-    msg->id = message.id;
-//    msg->seq = mess;
-    msg->size = message.size;
-    msg->data = d;
-    memmove(d, message.data, message.size);
+    auto copy = message;
+    copy.seq = 111; // TODO: set seq
 
 //    std::lock_guard<std::mutex> l(connectionMutex);
     for (auto &pair : connections) {
         Connection *connection = pair.second.get();
-        auto ok = connection->socket().write(buffer.get(), bufferSize);
+        auto ok = connection->post(copy);
         if (!ok)
             std::cerr << "Can't write to client" << ok.errorString();
     }

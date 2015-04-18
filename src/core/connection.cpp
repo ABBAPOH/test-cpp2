@@ -30,6 +30,28 @@ void Connection::process()
     _readOffset = total_length - bytes_read;
 }
 
+Result<void> Connection::post(const Message &message)
+{
+    const auto size = message.size;
+    const auto bufferSize = sizeof(Message) + size;
+    std::unique_ptr<char []> buffer(new char[bufferSize]);
+
+    auto tempMessage = reinterpret_cast<Message*>(buffer.get());
+    char *data = reinterpret_cast<char *>(tempMessage + 1);
+
+    tempMessage->id = 1;
+    tempMessage->seq = message.seq;
+    tempMessage->size = size;
+    tempMessage->data = data;
+    memmove(data, message.data, size);
+
+    auto ok = _socket.write(buffer.get(), bufferSize);
+    if (!ok)
+        return Error(ok.errorString());
+
+    return Nothing();
+}
+
 int64_t Connection::readData(const char *data, int64_t length)
 {
     std::size_t result = 0;

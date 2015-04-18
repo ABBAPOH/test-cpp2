@@ -23,6 +23,7 @@ public:
     TcpSocket &socket() { return _socket; }
 
     void process();
+    Result<void> post(const Message &message);
 
     IProcess *handler() const { return _handler; }
     void setHandler(IProcess *handler) { _handler = handler; }
