@@ -44,8 +44,39 @@ void ServerPrivate::runOnce()
         std::cerr << "kevent" << std::endl;
         return;
     }
+
+    int newFd = 0;
     if (!ev->udata && (int)ev->ident == socket.fd()) {
         std::cout << "Accept" << std::endl;
 
+        struct kevent ev;
+        memset(&ev, 0, sizeof(struct kevent));
+
+        EV_SET(ev_ch++, socket.fd(), EVFILT_READ, EV_ADD | EV_ONESHOT, 0, 0, 0);
+
+        auto accepted = socket.accept();
+        if (!accepted) {
+            std::cerr << "Accept failed" << accepted.errorString() << std::endl;
+            return;
+        }
+        newFd = accepted->fd();
+
+        std::lock_guard<std::mutex> l(connectionMutex);
+        connections.emplace(newFd, std::unique_ptr<Connection>(new Connection(*accepted)));
+
+    } else {
+        std::cout << "Recv from client" << std::endl;
+        newFd = (int)ev->ident;
+
+        std::lock_guard<std::mutex> l(connectionMutex);
+        auto connection = connections[newFd].get();
+        connection->read();
+    }
+
+    EV_SET(ev_ch++, newFd, EVFILT_READ, EV_ADD | EV_ONESHOT, 0, 0, 0);
+
+    nfd = kevent(_kq, ev0, ev_ch - ev0, 0, 0, 0);
+    if (nfd == -1) {
+        std::cerr << "kevent" << std::endl;
     }
 }
