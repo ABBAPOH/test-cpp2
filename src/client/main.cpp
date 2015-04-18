@@ -6,6 +6,10 @@
 #include <iostream>
 #include <memory>
 
+#include "mainwindow.h"
+
+#include <QtWidgets/QApplication>
+
 Result<void> send(TcpSocket &socket, const Message &message)
 {
     auto bufferSize = sizeof(Frame) + message.size;
@@ -26,34 +30,37 @@ Result<void> send(TcpSocket &socket, const Message &message)
 
 int main(int argc, char *argv[])
 {
-    (void)argc;
-    (void)argv;
+//    (void)argc;
+//    (void)argv;
 
-    TcpSocket socket;
-    auto ok = socket.connect("127.0.0.1", 5001);
-    if (!ok) {
-        std::cerr << "Can't connect: " << ok.errorString();
-        return 1;
-    }
+//    TcpSocket socket;
+//    auto ok = socket.connect("127.0.0.1", 5001);
+//    if (!ok) {
+//        std::cerr << "Can't connect: " << ok.errorString();
+//        return 1;
+//    }
 
-    int seq = 1;
+//    int seq = 1;
 
-    while (1) {
-        const char *string = "hello world";
+//    while (1) {
+//        const char *string = "hello world";
 
-        Message msg;
-        msg.id = 1;
-        msg.seq = seq++;
-        msg.size = strlen(string);
-        msg.data = const_cast<char *>(string);
+//        Message msg;
+//        msg.id = 1;
+//        msg.seq = seq++;
+//        msg.size = strlen(string);
+//        msg.data = const_cast<char *>(string);
 
-        auto sent = ::send(socket, msg);
-        if (!sent) {
-            std::cerr << "Can't send: " << sent.errorString();
-            return 1;
-        }
-    }
+//        auto sent = ::send(socket, msg);
+//        if (!sent) {
+//            std::cerr << "Can't send: " << sent.errorString();
+//            return 1;
+//        }
+//    }
 
-    return 0;
+    QApplication app(argc, argv);
+    MainWindow w;
+    w.show();
+    return app.exec();
 }
 
