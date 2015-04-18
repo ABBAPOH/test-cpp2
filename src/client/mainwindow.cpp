@@ -1,17 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "client.h"
+
 #include <result.h>
 
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMessageBox>
 #include <QtCore/QDebug>
-
-class Client
-{
-public:
-    Result<void> send(const char *data, int64_t size) { return Nothing(); }
-};
+#include <QtCore/QSocketNotifier>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -23,6 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionQuit, &QAction::triggered, qApp, &QCoreApplication::quit);
     connect(ui->sendButton, &QPushButton::clicked, this, &MainWindow::send);
     connect(ui->lineEdit, &QLineEdit::returnPressed, this, &MainWindow::send);
+
+    auto notifier = new QSocketNotifier(client->fd(), QSocketNotifier::Read, this);
+    connect(notifier, &QSocketNotifier::activated, this, &MainWindow::onMessageReceived);
 }
 
 MainWindow::~MainWindow()
@@ -46,4 +46,9 @@ void MainWindow::send()
     }
 
     ui->lineEdit->clear();
+}
+
+void MainWindow::onMessageReceived()
+{
+
 }

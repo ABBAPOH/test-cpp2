@@ -19,6 +19,7 @@ public:
 
 private slots:
     void send();
+    void onMessageReceived();
 
 private:
     Ui::MainWindow *ui {nullptr};
