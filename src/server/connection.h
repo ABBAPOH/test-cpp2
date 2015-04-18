@@ -6,11 +6,14 @@
 #include <vector>
 
 struct Message;
+class ServerPrivate;
 
 class Connection
 {
 public:
-    explicit Connection(const TcpSocket &socket);
+    Connection(ServerPrivate *server, const TcpSocket &socket);
+
+    TcpSocket &socket() { return _socket; }
 
     void read();
 
@@ -19,6 +22,7 @@ private:
     void process(const Message &message);
 
 private:
+    ServerPrivate *_server {nullptr};
     TcpSocket _socket;
 
     std::vector<char> _readBuffer;

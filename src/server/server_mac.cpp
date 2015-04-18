@@ -1,6 +1,8 @@
 #include "server.h"
 #include "server_p.h"
 
+#include "message.h"
+
 #include <iostream>
 
 #include <sys/types.h>
@@ -62,7 +64,14 @@ void ServerPrivate::runOnce()
         newFd = accepted->fd();
 
         std::lock_guard<std::mutex> l(connectionMutex);
-        connections.emplace(newFd, std::unique_ptr<Connection>(new Connection(*accepted)));
+        connections.emplace(newFd, std::unique_ptr<Connection>(new Connection(this, *accepted)));
+
+        Message msg;
+        msg.seq = 10;
+        msg.id = 1;
+        msg.size = 5;
+        msg.data = "hello";
+        multiCast(msg);
 
     } else {
         std::cout << "Recv from client" << std::endl;

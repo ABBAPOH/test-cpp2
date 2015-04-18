@@ -139,6 +139,9 @@ Result<TcpSocket> TcpSocket::accept()
     if (fd == -1)
         return Error(std::string("Accept failed :") + strerror(errno));
 
+    if (setNoDelay(fd))
+        return Error(std::string("setNoDelay failed: ") + strerror(errno));
+
     return TcpSocket(fd);
 }
 
@@ -176,6 +179,7 @@ Result<int64_t> TcpSocket::write(const char *data, int64_t size)
     if (size == 0)
         return 0;
 
+    std::cout << "TcpSocket::write, size = " << size << std::endl;
     auto bytesWritten = ::send(_fd, data, size, 0);
     if (bytesWritten == -1)
         return Error(std::string("Write failed: ") + strerror(errno));

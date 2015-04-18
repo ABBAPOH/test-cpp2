@@ -20,6 +20,8 @@ public:
     void runOnce();
     void stop();
 
+    void multiCast(const Message &message);
+
     int threadsCount {4};
     int port {5000};
     TcpSocket socket;

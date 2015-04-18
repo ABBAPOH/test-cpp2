@@ -1,6 +1,8 @@
 #include "server.h"
 #include "server_p.h"
 
+#include "message.h"
+
 #include <iostream>
 
 void ServerPrivate::run()
@@ -18,6 +20,31 @@ void ServerPrivate::run()
 void ServerPrivate::stop()
 {
     stopped = true;
+}
+
+void ServerPrivate::multiCast(const Message &message)
+{
+    std::cout << "multiCast" << message.seq << std::endl;
+    // TODO: duplicates code in Client::send
+    auto bufferSize = sizeof(Message) + message.size;
+    std::unique_ptr<char []> buffer(new char[bufferSize]);
+
+    auto msg = reinterpret_cast<Message*>(buffer.get());
+    char *d = reinterpret_cast<char *>(msg + 1);
+
+    msg->id = message.id;
+//    msg->seq = mess;
+    msg->size = message.size;
+    msg->data = d;
+    memmove(d, message.data, message.size);
+
+//    std::lock_guard<std::mutex> l(connectionMutex);
+    for (auto &pair : connections) {
+        Connection *connection = pair.second.get();
+        auto ok = connection->socket().write(buffer.get(), bufferSize);
+        if (!ok)
+            std::cerr << "Can't write to client" << ok.errorString();
+    }
 }
 
 Server::Server() :

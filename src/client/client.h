@@ -11,7 +11,9 @@ public:
     ~Client();
 
     int fd() { return _socket.fd(); }
+    TcpSocket &socket() { return _socket; }
 
+    Result<void> connect();
     Result<void> send(const char *data, int64_t size);
 
 private:

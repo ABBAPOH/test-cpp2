@@ -12,8 +12,14 @@ Client::~Client()
 
 }
 
+Result<void> Client::connect()
+{
+    return _socket.connect("127.0.0.1", 5001);
+}
+
 Result<void> Client::send(const char *data, int64_t size)
 {
+    // TODO: duplicates code in Server::multicast
     auto bufferSize = sizeof(Message) + size;
     std::unique_ptr<char []> buffer(new char[bufferSize]);
 

@@ -1,11 +1,14 @@
 #include "connection.h"
 
+#include "server.h"
+#include "server_p.h"
 #include "message.h"
 
 #include <cstring>
 #include <iostream>
 
-Connection::Connection(const TcpSocket &socket) :
+Connection::Connection(ServerPrivate *server, const TcpSocket &socket) :
+    _server(server),
     _socket(socket)
 {
     _readBuffer.resize(1024);
@@ -62,4 +65,6 @@ void Connection::process(const Message &message)
     std::cout << "Received message, id = " << message.id
               << " size = " << message.size
               << " seq = " << message.seq << std::endl;
+
+    _server->multiCast(message);
 }
