@@ -8,25 +8,34 @@
 struct Message;
 class ServerPrivate;
 
+class IProcess
+{
+public:
+    virtual ~IProcess() {}
+    virtual void process(const Message &message) = 0;
+};
+
 class Connection
 {
 public:
-    Connection(ServerPrivate *server, const TcpSocket &socket);
+    explicit Connection(const TcpSocket &socket);
 
     TcpSocket &socket() { return _socket; }
 
-    void read();
+    void process();
+
+    IProcess *handler() const { return _handler; }
+    void setHandler(IProcess *handler) { _handler = handler; }
 
 private:
     int64_t readData(const char *data, int64_t length);
-    void process(const Message &message);
 
 private:
-    ServerPrivate *_server {nullptr};
     TcpSocket _socket;
 
     std::vector<char> _readBuffer;
     size_t _readOffset;
+    IProcess *_handler {nullptr};
 };
 
 #endif // CONNECTION_H

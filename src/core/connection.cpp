@@ -1,21 +1,18 @@
 #include "connection.h"
 
-#include "server.h"
-#include "server_p.h"
 #include "message.h"
 
 #include <cstring>
 #include <iostream>
 
-Connection::Connection(ServerPrivate *server, const TcpSocket &socket) :
-    _server(server),
+Connection::Connection(const TcpSocket &socket) :
     _socket(socket)
 {
     _readBuffer.resize(1024);
     _readOffset = 0;
 }
 
-void Connection::read()
+void Connection::process()
 {
     auto ok = _socket.read(_readBuffer.data() + _readOffset, _readBuffer.size() - _readOffset);
 
@@ -52,19 +49,11 @@ int64_t Connection::readData(const char *data, int64_t length)
             break;
         ptr += sizeof(Frame);
 
-        process(msg);
+        if (_handler)
+            _handler->process(msg);
 
         ptr += frame->size;
         result += fullSize;
     }
     return result;
-}
-
-void Connection::process(const Message &message)
-{
-    std::cout << "Received message, id = " << message.id
-              << " size = " << message.size
-              << " seq = " << message.seq << std::endl;
-
-    _server->multiCast(message);
 }

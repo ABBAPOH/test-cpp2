@@ -12,9 +12,12 @@
 #include <vector>
 #include <unordered_map>
 
+class ServerProcess;
+
 class ServerPrivate
 {
 public:
+    ServerPrivate();
     void run();
     void start();
     void runOnce();
@@ -38,7 +41,20 @@ public:
     std::mutex connectionMutex;
     std::unordered_map<int, std::unique_ptr<Connection>> connections;
 
+    std::unique_ptr<ServerProcess> _handler;
+
     friend class Server;
+};
+
+class ServerProcess : public IProcess
+{
+public:
+    explicit ServerProcess(ServerPrivate *server) : _server (server) {}
+
+    void process(const Message &message) { _server->multiCast(message); }
+
+private:
+    ServerPrivate *_server {nullptr};
 };
 
 #endif // SERVER_P_H

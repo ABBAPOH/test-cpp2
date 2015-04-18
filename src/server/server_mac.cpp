@@ -64,7 +64,9 @@ void ServerPrivate::runOnce()
         newFd = accepted->fd();
 
         std::lock_guard<std::mutex> l(connectionMutex);
-        connections.emplace(newFd, std::unique_ptr<Connection>(new Connection(this, *accepted)));
+        auto connection = new Connection(*accepted);
+        connection->setHandler(_handler.get());
+        connections.emplace(newFd, std::unique_ptr<Connection>(connection));
 
         Message msg;
         msg.seq = 10;
@@ -79,7 +81,7 @@ void ServerPrivate::runOnce()
 
         std::lock_guard<std::mutex> l(connectionMutex);
         auto connection = connections[newFd].get();
-        connection->read();
+        connection->process();
     }
 
     EV_SET(ev_ch++, newFd, EVFILT_READ, EV_ADD | EV_ONESHOT, 0, 0, 0);

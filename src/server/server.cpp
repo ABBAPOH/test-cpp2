@@ -5,6 +5,12 @@
 
 #include <iostream>
 
+ServerPrivate::ServerPrivate() :
+    _handler(new ServerProcess(this))
+{
+
+}
+
 void ServerPrivate::run()
 {
     while (!stopped) {
