@@ -42,13 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
         QMessageBox::warning(0, tr("bla"), tr("Can't conenct"));
     }
 
-//    auto notifier = new QSocketNotifier(client->fd(), QSocketNotifier::Read, this);
-//    connect(notifier, &QSocketNotifier::activated, this, &MainWindow::onMessageReceived);
-
-    auto timer = new QTimer(this);
-    timer->setInterval(2000);
-    connect(timer, &QTimer::timeout, this, &MainWindow::onMessageReceived);
-    timer->start();
+    auto notifier = new QSocketNotifier(client->fd(), QSocketNotifier::Read, this);
+    connect(notifier, &QSocketNotifier::activated, this, &MainWindow::onMessageReceived);
 }
 
 MainWindow::~MainWindow()
