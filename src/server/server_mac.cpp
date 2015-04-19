@@ -67,14 +67,6 @@ void ServerPrivate::runOnce()
         auto connection = new Connection(*accepted);
         connection->setHandler(_handler.get());
         connections.emplace(newFd, std::unique_ptr<Connection>(connection));
-
-//        Message msg;
-//        msg.seq = 10;
-//        msg.id = 1;
-//        msg.size = 5;
-//        msg.data = "hello";
-//        multiCast(msg);
-
     } else {
         std::cout << "Recv from client" << std::endl;
         newFd = (int)ev->ident;
