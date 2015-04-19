@@ -10,6 +10,8 @@
 
 #include <QtWidgets/QApplication>
 
+#include "client.h"
+
 Result<void> send(TcpSocket &socket, const Message &message)
 {
     auto bufferSize = sizeof(Frame) + message.size;
@@ -27,6 +29,16 @@ Result<void> send(TcpSocket &socket, const Message &message)
 
     return Nothing();
 }
+
+class Process : public IProcess
+{
+    void process(const Message &message)
+    {
+        std::cout << "client process" << std::string(message.data, message.size) << std::endl;
+        return;
+    }
+
+};
 
 int main(int argc, char *argv[])
 {
@@ -61,6 +73,20 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     MainWindow w;
     w.show();
+
+//        Process p;
+//        Client c;
+//        c.connect();
+//        c.connection()->setHandler(&p);
+//        while (true) {
+//            c.send("hello", 5);
+//            app.processEvents();
+//            c.connection()->process();
+//        }
+
+
     return app.exec();
+
 }
+
 

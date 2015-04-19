@@ -3,6 +3,7 @@
 
 #include "client.h"
 
+#include <connection.h>
 #include <message.h>
 #include <result.h>
 
@@ -12,10 +13,22 @@
 #include <QtCore/QSocketNotifier>
 #include <QTimer>
 
+class MainWindow::Handler : public IProcess
+{
+public:
+    explicit Handler(MainWindow *window) : _window(window) {}
+
+    void process(const Message &message) override { _window->process(message); }
+
+private:
+    MainWindow *_window {nullptr};
+};
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    client(new Client)
+    client(new Client),
+    handler(new Handler(this))
 {
     ui->setupUi(this);
 
@@ -23,22 +36,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->sendButton, &QPushButton::clicked, this, &MainWindow::send);
     connect(ui->lineEdit, &QLineEdit::returnPressed, this, &MainWindow::send);
 
-    client->connect();
+    auto ok = client->connect();
+    client->connection()->setHandler(handler.get());
+    if (!ok) {
+        QMessageBox::warning(0, tr("bla"), tr("Can't conenct"));
+    }
 
-    auto notifier = new QSocketNotifier(client->fd(), QSocketNotifier::Read, this);
-    connect(notifier, &QSocketNotifier::activated, this, &MainWindow::onMessageReceived);
+//    auto notifier = new QSocketNotifier(client->fd(), QSocketNotifier::Read, this);
+//    connect(notifier, &QSocketNotifier::activated, this, &MainWindow::onMessageReceived);
 
     auto timer = new QTimer(this);
-    timer->setInterval(1000);
+    timer->setInterval(2000);
     connect(timer, &QTimer::timeout, this, &MainWindow::onMessageReceived);
     timer->start();
-
-    _readBuffer.resize(1024);
 }
 
 MainWindow::~MainWindow()
 {
-    delete client;
     delete ui;
 }
 
@@ -60,63 +74,16 @@ void MainWindow::send()
     ui->lineEdit->clear();
 }
 
-// TODO: duplicates code in Connection
 void MainWindow::onMessageReceived()
 {
-//    qDebug() << "Client::recv";
-
-    auto &socket = client->socket();
-    auto ok = socket.read(_readBuffer.data() + _readOffset, _readBuffer.size() - _readOffset);
-
-    if (!ok) {
-        qDebug() << "Can't read from socket";
-//        std::cerr << "Can't read from socket" << ok.errorString() << std::endl;
-        return;
-    }
-
-    auto length = *ok;
-    if (length == 0)
-        return;
-    qDebug() << length;
-
-    char *data = _readBuffer.data();
-    const std::size_t total_length = _readOffset + length;
-    const std::size_t bytes_read = readData(data, total_length);
-    std::memmove(data, data + bytes_read, total_length - bytes_read);
-    _readOffset = total_length - bytes_read;
-}
-
-int64_t MainWindow::readData(const char *data, int64_t length)
-{
-    std::size_t result = 0;
-    const char *end = data + length;
-    const char *ptr = data;
-    while (ptr + sizeof(Frame) <= end) {
-        auto *frame = reinterpret_cast<const Frame *>(ptr);
-        const size_t fullSize = sizeof(Frame) + frame->size;
-
-        Message msg;
-        msg.id = frame->id;
-        msg.seq = frame->seq;
-        msg.size = frame->size;
-        msg.data = const_cast<char *>(reinterpret_cast<const char *>(ptr + sizeof(Frame)));
-
-        if (ptr + fullSize > end)
-            break;
-        ptr += sizeof(Frame);
-
-        process(msg);
-
-        ptr += frame->size;
-        result += fullSize;
-    }
-    return result;
+    client->connection()->process();
+    return;
 }
 
 void MainWindow::process(const Message &message)
 {
     auto text = ui->textEdit->toPlainText();
     auto line = QString::fromUtf8(message.data, message.size);
-    text += "\n" + line;
+    text += line + "\n";
     ui->textEdit->setPlainText(text);
 }

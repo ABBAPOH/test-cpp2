@@ -4,7 +4,8 @@
 #include <QtWidgets/QMainWindow>
 
 class Client;
-class Message;
+class Connection;
+struct Message;
 
 namespace Ui {
 class MainWindow;
@@ -23,15 +24,14 @@ private slots:
     void onMessageReceived();
 
 private:
-    int64_t readData(const char *data, int64_t length);
     void process(const Message &message);
 
 private:
-    Ui::MainWindow *ui {nullptr};
-    Client *client {nullptr};
+    class Handler;
 
-    std::vector<char> _readBuffer;
-    size_t _readOffset {0};
+    Ui::MainWindow *ui {nullptr};
+    std::unique_ptr<Client> client;
+    std::unique_ptr<Handler> handler;
 };
 
 #endif // MAINWINDOW_H

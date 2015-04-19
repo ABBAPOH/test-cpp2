@@ -158,7 +158,7 @@ Result<int64_t> TcpSocket::read(char *data, int64_t size)
     if (size == 0)
         return 0;
 
-    auto bytesRead = ::recv(_fd, data, size, 0);
+    auto bytesRead = ::recv(_fd, data, size, MSG_DONTWAIT);
     if (bytesRead == -1)
         return Error(std::string("Read failed: ") + strerror(errno));
 
@@ -180,9 +180,10 @@ Result<int64_t> TcpSocket::write(const char *data, int64_t size)
         return 0;
 
     std::cout << "TcpSocket::write, size = " << size << std::endl;
-    auto bytesWritten = ::send(_fd, data, size, 0);
+    auto bytesWritten = ::send(_fd, data, size, MSG_DONTWAIT);
     if (bytesWritten == -1)
         return Error(std::string("Write failed: ") + strerror(errno));
+    std::cout << "TcpSocket::write, written " << bytesWritten << " bytes" << std::endl;
 
     return bytesWritten;
 }

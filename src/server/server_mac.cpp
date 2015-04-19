@@ -68,12 +68,12 @@ void ServerPrivate::runOnce()
         connection->setHandler(_handler.get());
         connections.emplace(newFd, std::unique_ptr<Connection>(connection));
 
-        Message msg;
-        msg.seq = 10;
-        msg.id = 1;
-        msg.size = 5;
-        msg.data = "hello";
-        multiCast(msg);
+//        Message msg;
+//        msg.seq = 10;
+//        msg.id = 1;
+//        msg.size = 5;
+//        msg.data = "hello";
+//        multiCast(msg);
 
     } else {
         std::cout << "Recv from client" << std::endl;
@@ -82,8 +82,9 @@ void ServerPrivate::runOnce()
         std::lock_guard<std::mutex> l(connectionMutex);
         Connection *connection = connections[newFd].get();
         if (ev->flags & EV_ERROR || ev->flags & EV_EOF) {
-            std::cerr << "Error event" << std::endl;
+            std::cout << "Close client" << std::endl;
             connection->socket().close();
+            connections.erase(newFd);
             return;
         }
         connection->process();

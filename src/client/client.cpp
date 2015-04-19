@@ -14,7 +14,11 @@ Client::~Client()
 
 Result<void> Client::connect()
 {
-    return _socket.connect("127.0.0.1", 5001);
+    auto ok = _socket.connect("127.0.0.1", 5001);
+    if (ok) {
+        _connection.reset(new Connection(_socket));
+    }
+    return ok;
 }
 
 Result<void> Client::send(const char *data, int64_t size)
@@ -32,10 +36,6 @@ Result<void> Client::send(const char *data, int64_t size)
     message->data = d;
     memmove(d, data, size);
 
-    auto ok = _socket.write(buffer.get(), bufferSize);
-    if (!ok)
-        return Error(ok.errorString());
-
-    return Nothing();
+    return connection()->post(*message);
 }
 

@@ -30,15 +30,12 @@ void ServerPrivate::stop()
 
 void ServerPrivate::multiCast(const Message &message)
 {
-    std::cout << "multiCast" << message.seq << std::endl;
-
-    auto copy = message;
-    copy.seq = 111; // TODO: set seq
+    std::cout << "ServerPrivate::multiCast " << message.size << std::endl;
 
 //    std::lock_guard<std::mutex> l(connectionMutex);
     for (auto &pair : connections) {
         Connection *connection = pair.second.get();
-        auto ok = connection->post(copy);
+        auto ok = connection->post(message);
         if (!ok)
             std::cerr << "Can't write to client" << ok.errorString();
     }

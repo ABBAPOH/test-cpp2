@@ -32,17 +32,17 @@ void Connection::process()
 
 Result<void> Connection::post(const Message &message)
 {
+    std::cout << "Connection::post" << message.size << std::endl;
     const auto size = message.size;
-    const auto bufferSize = sizeof(Message) + size;
+    const auto bufferSize = sizeof(Frame) + size;
     std::unique_ptr<char []> buffer(new char[bufferSize]);
 
-    auto tempMessage = reinterpret_cast<Message*>(buffer.get());
-    char *data = reinterpret_cast<char *>(tempMessage + 1);
+    auto frame = reinterpret_cast<Frame*>(buffer.get());
+    char *data = reinterpret_cast<char *>(frame + 1);
 
-    tempMessage->id = 1;
-    tempMessage->seq = message.seq;
-    tempMessage->size = size;
-    tempMessage->data = data;
+    frame->id = 1;
+    frame->seq = message.seq;
+    frame->size = size;
     memmove(data, message.data, size);
 
     auto ok = _socket.write(buffer.get(), bufferSize);
