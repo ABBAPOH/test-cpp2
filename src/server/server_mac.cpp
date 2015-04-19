@@ -80,7 +80,12 @@ void ServerPrivate::runOnce()
         newFd = (int)ev->ident;
 
         std::lock_guard<std::mutex> l(connectionMutex);
-        auto connection = connections[newFd].get();
+        Connection *connection = connections[newFd].get();
+        if (ev->flags & EV_ERROR || ev->flags & EV_EOF) {
+            std::cerr << "Error event" << std::endl;
+            connection->socket().close();
+            return;
+        }
         connection->process();
     }
 
