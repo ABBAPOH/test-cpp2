@@ -70,11 +70,18 @@ int main(int argc, char *argv[])
         int r = 0;
         if ((r = poll(fds, 2, 10000)) < 0) {
             std::cerr << "Poll failed: " << strerror(r) << std::endl;
+            return 1;
         }
+
+        if (r == 0)
+            continue;
 
         if (fds[0].revents & POLLIN) {
             std::string s;
             std::cin >> s;
+
+            if (s == "/quit")
+                return 0;
 
             Message msg(++seq, ByteArray(s.data(), s.size()));
             ok = link.post(msg);
