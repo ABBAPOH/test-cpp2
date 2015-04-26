@@ -3,7 +3,13 @@
 
 #include <vector>
 
-typedef std::vector<char> ByteArray;
+class ByteArray : public std::vector<char>
+{
+public:
+    ByteArray() = default;
+    ByteArray(const char *s, size_t length) { resize(length); memmove(data(), s, length); }
+    ByteArray(const ByteArray &other) = default;
+};
 
 class Message
 {
@@ -21,7 +27,7 @@ public:
 
 private:
     int64_t _seq {0};
-    std::vector<char> _data;
+    ByteArray _data;
 };
 
 #endif // MESSAGE_H
