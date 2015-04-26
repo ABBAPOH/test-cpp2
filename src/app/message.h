@@ -30,4 +30,9 @@ private:
     ByteArray _data;
 };
 
+inline bool operator ==(const Message &lhs, const Message &rhs)
+{
+    return lhs.seq() == rhs.seq() && lhs.data() == rhs.data();
+}
+
 #endif // MESSAGE_H

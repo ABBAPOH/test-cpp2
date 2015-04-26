@@ -15,9 +15,14 @@
 #define HELLO_GROUP "225.0.0.37"
 
 #include "udplink.h"
+#include "optional.h"
 
 int main(int argc, char *argv[])
 {
+    struct Context {
+        Optional<Message> lastMessage;
+    };
+
     if (argc != 3) {
         std::cout << "Usage: ./app host port" << std::endl;
         return 0;
@@ -39,14 +44,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    auto cb = [](const Message &message, void * /*data*/)
+    auto cb = [](const Message &message, void * data)
     {
-        std::cout << "<< " << std::string(message.data().data(), message.size()) << std::endl;
-
-        std::cout << ">> " << std::flush;
+        Context &context = *static_cast<Context *>(data);
+        if (context.lastMessage && context.lastMessage == message) {
+            context.lastMessage = Nothing();
+            return;
+        }
+        std::cout << std::string(message.data().data(), message.size()) << std::endl;
     };
 
-    link.setCallback(cb, 0);
+    Context context;
+    link.setCallback(cb, &context);
 
     struct pollfd fds[2];
     fds[0].fd = fileno(stdin);
@@ -54,8 +63,6 @@ int main(int argc, char *argv[])
 
     fds[1].fd = link.fd();
     fds[1].events = POLLIN;
-
-    std::cout << ">> " << std::flush;
 
     while (1) {
         int r = 0;
@@ -71,6 +78,7 @@ int main(int argc, char *argv[])
             ok = link.post(msg);
             if (!ok)
                 std::cerr << "Post failed " << ok.errorString() << std::endl;
+            context.lastMessage = msg;
 
         } else if (fds[1].revents & POLLIN) {
             link.process();
