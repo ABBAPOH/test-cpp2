@@ -1,21 +1,9 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <time.h>
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
-
-#include <sys/poll.h>
+#include "udplink.h"
+#include "optional.h"
 
 #include <iostream>
 
-#define HELLO_PORT 12345
-#define HELLO_GROUP "225.0.0.37"
-
-#include "udplink.h"
-#include "optional.h"
+#include <sys/poll.h>
 
 int main(int argc, char *argv[])
 {
