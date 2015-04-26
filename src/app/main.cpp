@@ -64,6 +64,8 @@ int main(int argc, char *argv[])
     fds[1].fd = link.fd();
     fds[1].events = POLLIN;
 
+    int64_t seq = 0;
+
     while (1) {
         int r = 0;
         if ((r = poll(fds, 2, 10000)) < 0) {
@@ -74,7 +76,7 @@ int main(int argc, char *argv[])
             std::string s;
             std::cin >> s;
 
-            Message msg(1, ByteArray(s.data(), s.size()));
+            Message msg(++seq, ByteArray(s.data(), s.size()));
             ok = link.post(msg);
             if (!ok)
                 std::cerr << "Post failed " << ok.errorString() << std::endl;
