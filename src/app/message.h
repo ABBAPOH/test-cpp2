@@ -17,7 +17,10 @@ class Message
 {
 public:
     explicit Message(int64_t seq = 0, const ByteArray &data = ByteArray());
+    Message(const Message &other) = default;
     ~Message();
+
+    Message &operator =(const Message &other) = default;
 
     inline int64_t seq() const { return _seq; }
     inline void setSeq(int64_t seq) { _seq = seq; }

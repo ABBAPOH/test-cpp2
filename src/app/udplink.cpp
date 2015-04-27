@@ -85,12 +85,12 @@ Result<void> UdpLink::open()
         }
     }
 
-    struct ip_mreq mreq;
+    struct ip_mreq mreq = {};
     mreq.imr_multiaddr.s_addr = inet_addr(_host.c_str());
     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
     if (setsockopt(_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
         close();
-        return Error(std::string("Can't set socket option : ") + strerror(errno));
+        return Error(std::string("Can't join multicast group ") + _host + " : " + strerror(errno));
     }
 
     return Nothing();
@@ -126,6 +126,7 @@ Result<void> UdpLink::process()
 Result<void> UdpLink::post(const Message &message)
 {
     Frame frame;
+    frame.seq = message.seq();
     struct iovec iov[2] = {{&frame, sizeof(Frame)}, {(void*)message.data().data(), message.size()}};
 
     struct msghdr m = { _addr, (socklen_t)_addr.size, iov, 2 };
