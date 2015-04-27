@@ -26,7 +26,7 @@ Project {
         if (qbs.targetOS.contains("osx"))
             return [ "-std=c++11", "-stdlib=libc++" ]
         if (qbs.targetOS.contains("linux"))
-            return [ "-std=c++11", "-Werror" ]
+            return [ "-std=c++11" ]
         else
             return []
     }

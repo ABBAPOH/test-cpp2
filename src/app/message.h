@@ -2,12 +2,14 @@
 #define MESSAGE_H
 
 #include <vector>
+#include <sys/types.h>
+#include <cstring>
 
 class ByteArray : public std::vector<char>
 {
 public:
     ByteArray() = default;
-    ByteArray(const char *s, size_t length) { resize(length); memmove(data(), s, length); }
+    ByteArray(const char *s, size_t length) { resize(length); std::memmove(data(), s, length); }
     ByteArray(const ByteArray &other) = default;
 };
 
